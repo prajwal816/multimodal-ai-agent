@@ -86,14 +86,14 @@ class MultimodalAgent:
         self._embedder = Embedder.from_config(cfg)
         self._memory = FAISSMemory(embedder=self._embedder, cfg=cfg)
 
+        # RAG (must be instatiated before ingestion)
+        self._rag = RAGPipeline.from_config(cfg, memory=self._memory, llm=self._llm)
+
         # Try to load persisted index; otherwise ingest corpus
         if not self._memory.load():
             self._ingest_corpus()
 
         self._log.info(f"Memory store: {self._memory}")
-
-        # RAG
-        self._rag = RAGPipeline.from_config(cfg, memory=self._memory, llm=self._llm)
 
         # LangChain Tools
         self._vision_tool = VisionAnalysisTool(vision_model=self._vision_model)
